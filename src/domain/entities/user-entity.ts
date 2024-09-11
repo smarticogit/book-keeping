@@ -1,30 +1,38 @@
-import { Entity } from "../../core/entities/entity";
-import { UniqueEntityId } from "../../core/entities/unique-entity-id";
+import { Entity } from '@/core/entities/entity'
+import { UniqueEntityId } from '@/core/entities/unique-entity-id'
+
+interface UserProps {
+  name: string
+  email: string
+  password: string
+  createdAt: Date
+  active: boolean
+}
 
 export class User extends Entity<UserProps> {
   get email() {
-    return this.props.email;
+    return this.props.email
   }
 
   get name() {
-    return this.props.name;
+    return this.props.name
   }
 
   get password() {
-    return this.props.password;
+    return this.props.password
   }
 
   get createdAt() {
-    return this.props.createdAt;
+    return this.props.createdAt
   }
 
   get active() {
-    return this.props.active;
+    return this.props.active
   }
 
   static create(
-    props: Omit<UserProps, "createdAt" | "active">,
-    id?: UniqueEntityId
+    props: Omit<UserProps, 'createdAt' | 'active'>,
+    id?: UniqueEntityId,
   ) {
     const user = new User(
       {
@@ -32,17 +40,9 @@ export class User extends Entity<UserProps> {
         createdAt: new Date(),
         active: true,
       },
-      id
-    );
+      id,
+    )
 
-    return user;
+    return user
   }
-}
-
-interface UserProps {
-  name: string;
-  email: string;
-  password: string;
-  createdAt: Date;
-  active: boolean;
 }
