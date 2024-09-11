@@ -1,0 +1,14 @@
+.env
+node_modules
+.DS_Store
+coverage
+node_modules/
+dist/
+.idea/
+yarn.lock
+package-lock.json
+.build/
+.esbuild/
+.terraform/
+.env*
+.serverless*
