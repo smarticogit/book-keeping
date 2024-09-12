@@ -1,5 +1,5 @@
-import { User } from '../entities/user-entity'
+import { User } from '@/domain/entities/user'
 
-export interface UserRepository {
+export type UserRepository = {
   create(user: User): Promise<void>
 }

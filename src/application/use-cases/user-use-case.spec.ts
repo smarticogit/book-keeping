@@ -1,10 +1,11 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { User } from '@/domain/entities/user-entity'
+import { User } from '@/domain/entities/user'
 import { UserRepository } from '@/domain/repositories/user-repository'
 import { UserCreateUseCase } from './user-use-case'
 
 const fakeUserRepository: UserRepository = {
-  create: async (user: User): Promise<void> => {},
+  create: async (user: User): Promise<void> => {
+    console.log(user)
+  },
 }
 
 test('create an user', async () => {

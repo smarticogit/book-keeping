@@ -1,7 +1,7 @@
-import { User } from '../entities/user-entity'
-import { UserRepository } from '../repositories/user-repository'
+import { User } from '@/domain/entities/user'
+import { UserRepository } from '@/domain/repositories/user-repository'
 
-interface UserProps {
+type UserProps = {
   name: string
   email: string
   password: string
