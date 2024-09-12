@@ -1,11 +1,7 @@
+import { UserProps } from '@/domain/entities/types/user.types'
 import { User } from '@/domain/entities/user'
 import { UserRepository } from '@/domain/repositories/user-repository'
 
-type UserProps = {
-  name: string
-  email: string
-  password: string
-}
 export class UserCreateUseCase {
   constructor(private userRepository: UserRepository) {}
   async run({ name, email, password }: UserProps) {

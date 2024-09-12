@@ -1,6 +1,6 @@
 import { User } from '@/domain/entities/user'
 import { UserRepository } from '@/domain/repositories/user-repository'
-import { UserCreateUseCase } from './user-use-case'
+import { UserCreateUseCase } from '../user-use-case'
 
 const fakeUserRepository: UserRepository = {
   create: async (user: User): Promise<void> => {

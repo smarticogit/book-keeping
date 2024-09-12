@@ -7,4 +7,4 @@ export type User = {
   active: boolean
 }
 
-export type UserProps = Omit<User, 'id'>
+export type UserProps = Omit<User, 'id' | 'createdAt' | 'active'>
