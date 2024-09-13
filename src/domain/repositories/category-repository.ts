@@ -1,5 +1,5 @@
 import { Category } from '@/domain/entities/category'
+import { BaseRepository } from './base-repository'
+import { CategoryRequest } from '../entities/types/category.types'
 
-export interface CategoryRepository {
-  create(category: Category): Promise<void>
-}
+export type CategoryRepository = BaseRepository<Category, CategoryRequest>

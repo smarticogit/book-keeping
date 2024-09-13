@@ -1,5 +1,7 @@
-import { Report } from '@/domain/entities/report'
+import {
+  ReportRequest,
+  ReportResponse,
+} from '@/domain/entities/types/report.type'
+import { BaseRepository } from './base-repository'
 
-export interface ReportRepository {
-  create(report: Report): Promise<void>
-}
+export type ReportRepository = BaseRepository<ReportRequest, ReportResponse>

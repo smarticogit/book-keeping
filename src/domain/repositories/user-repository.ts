@@ -1,5 +1,4 @@
-import { UserRequest } from '@/domain/entities/types/user.types'
+import { UserRequest, UserResponse } from '@/domain/entities/types/user.types'
+import { BaseRepository } from './base-repository'
 
-export interface UserRepository {
-  create(user: UserRequest): Promise<void>
-}
+export type UserRepository = BaseRepository<UserRequest, UserResponse>

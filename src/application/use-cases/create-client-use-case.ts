@@ -12,6 +12,7 @@ export class CreateClientUseCase {
     const client = Client.create(input)
 
     await this.clientRepository.create(client)
+
     return client
   }
 }

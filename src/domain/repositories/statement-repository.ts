@@ -1,5 +1,10 @@
-import { StatementRequest } from '@/domain/entities/types/statement.types'
+import {
+  StatementRequest,
+  StatementResponse,
+} from '@/domain/entities/types/statement.types'
+import { BaseRepository } from './base-repository'
 
-export interface StatementRepository {
-  create(statement: StatementRequest): Promise<void>
-}
+export type StatementRepository = BaseRepository<
+  StatementRequest,
+  StatementResponse
+>

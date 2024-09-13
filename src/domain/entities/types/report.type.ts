@@ -5,3 +5,5 @@ export type Report = {
 }
 
 export type ReportProps = Omit<Report, 'id'>
+export type ReportRequest = ReportProps
+export type ReportResponse = Report
