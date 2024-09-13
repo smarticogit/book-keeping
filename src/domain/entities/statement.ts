@@ -1,12 +1,16 @@
 import { Entity } from './core/entity'
 import { UniqueEntityId } from './core/unique-entity-id'
-import { StatementProps } from './types/statement.types'
+import {
+  StatementProps,
+  StatementRequest,
+  StatementResponse,
+} from './types/statement.types'
 
 export class Statement extends Entity<StatementProps> {
   static create(
-    props: Omit<StatementProps, 'createdAt' | 'updatedAt'>,
+    props: StatementRequest,
     id?: UniqueEntityId,
-  ) {
+  ): StatementResponse {
     const bankAccount = new Statement(
       {
         ...props,

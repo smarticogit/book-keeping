@@ -15,4 +15,9 @@ export type Category = {
   subCategory?: SubCategory1[]
 }
 
+export type CategoryRequest = {
+  name: string
+  subCategory?: SubCategory1[]
+}
+
 export type CategoryProps = Omit<Category, 'id'>

@@ -1,5 +1,5 @@
-import { UniqueEntityId } from '../core/unique-entity-id'
-import { BankAccountRequest } from './bank-account.types'
+import { UniqueEntityId } from '@/domain/entities/core/unique-entity-id'
+import { Statement } from '@/domain/entities/types/statement.types'
 
 type Address = {
   street: string
@@ -11,13 +11,22 @@ type Address = {
   country: string
 }
 
+type BankAccount = {
+  clientId: string
+  bankName: string
+  accountNumber: string
+  branchNumber: string
+  accountType: 'checking' | 'savings'
+  statements?: Statement[]
+}
+
 export type ClientProps = {
   name: string
   email: string
   cpf?: string
   cnpj?: string
   address: Address
-  bankAccounts: BankAccountRequest[]
+  bankAccounts: BankAccount[]
   createdAt: Date
   updatedAt: Date
 }
@@ -28,7 +37,7 @@ export type ClientRequest = {
   cpf?: string
   cnpj?: string
   address: Address
-  bankAccounts: BankAccountRequest[]
+  bankAccounts: BankAccount[]
 }
 
 export type ClientResponse = {
@@ -38,7 +47,7 @@ export type ClientResponse = {
   cpf?: string
   cnpj?: string
   address: Address
-  bankAccounts: BankAccountRequest[]
+  bankAccounts: BankAccount[]
   createdAt: Date
   updatedAt: Date
 }

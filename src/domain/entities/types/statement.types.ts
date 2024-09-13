@@ -1,4 +1,4 @@
-import { UniqueEntityId } from '../core/unique-entity-id'
+import { UniqueEntityId } from '@/domain/entities/core/unique-entity-id'
 import { AccountActivity } from './account-activity.types'
 
 export type Statement = {
@@ -7,17 +7,36 @@ export type Statement = {
   statementDate: Date
   fileUrl: string
   signedFileUrl: string
-  accountActivity: AccountActivity[]
+  accountActivity?: AccountActivity[]
   createdAt: Date
   updatedAt: Date
 }
 
-export type StatementProps = Omit<Statement, 'id'>
+export type StatementProps = {
+  bankAccountId: string
+  statementDate: Date
+  fileUrl: string
+  signedFileUrl: string
+  accountActivity?: AccountActivity[]
+  createdAt: Date
+  updatedAt: Date
+}
 
 export type StatementRequest = {
   bankAccountId: string
   statementDate: Date
   fileUrl: string
   signedFileUrl: string
-  accountActivity: AccountActivity[]
+  accountActivity?: AccountActivity[]
+}
+
+export type StatementResponse = {
+  id: UniqueEntityId
+  bankAccountId: string
+  statementDate: Date
+  fileUrl: string
+  signedFileUrl: string
+  accountActivity?: AccountActivity[]
+  createdAt: Date
+  updatedAt: Date
 }
