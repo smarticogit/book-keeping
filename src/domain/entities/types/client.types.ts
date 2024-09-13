@@ -20,27 +20,7 @@ type BankAccount = {
   statements?: Statement[]
 }
 
-export type ClientProps = {
-  name: string
-  email: string
-  cpf?: string
-  cnpj?: string
-  address: Address
-  bankAccounts: BankAccount[]
-  createdAt: Date
-  updatedAt: Date
-}
-
-export type ClientRequest = {
-  name: string
-  email: string
-  cpf?: string
-  cnpj?: string
-  address: Address
-  bankAccounts: BankAccount[]
-}
-
-export type ClientResponse = {
+export type Client = {
   id: UniqueEntityId
   name: string
   email: string
@@ -51,3 +31,7 @@ export type ClientResponse = {
   createdAt: Date
   updatedAt: Date
 }
+
+export type ClientProps = Omit<Client, 'id'>
+export type ClientRequest = Omit<ClientProps, 'createdAt' | 'updatedAt'>
+export type ClientResponse = Client

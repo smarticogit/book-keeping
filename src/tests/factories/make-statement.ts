@@ -9,10 +9,8 @@ export function makeStatement(override: Partial<Statement> = {}) {
     signedFileUrl: faker.internet.url(),
     accountActivity: [
       {
-        id: faker.string.uuid(),
         category: [
           {
-            id: faker.string.uuid(),
             name: faker.lorem.words(1),
           },
         ],

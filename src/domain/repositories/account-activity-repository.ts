@@ -1,5 +1,5 @@
-import { AccountActivity } from '@/domain/entities/account-activity'
+import { AccountActivityResponse } from '@/domain/entities/types/account-activity.types'
 
 export interface AccountActivityRepository {
-  create(accountActivity: AccountActivity): Promise<void>
+  create(accountActivity: AccountActivityResponse): Promise<void>
 }

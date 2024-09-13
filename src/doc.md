@@ -1,4 +1,6 @@
-## Book Keeping Project Doc
+# Book Keeping
+
+## Project Details
 
 ### Entitys
 
@@ -81,7 +83,7 @@ type SubCategory2 {
 type Address {
     street: string
     number: string
-    complement?: string 
+    complement?: string
     city: string
     state: string
     postalCode: string

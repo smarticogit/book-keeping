@@ -1,3 +1,5 @@
+import { UniqueEntityId } from '@/domain/entities/core/unique-entity-id'
+
 export type SubCategory2 = {
   id: string
   name: string
@@ -10,7 +12,7 @@ export type SubCategory1 = {
 }
 
 export type Category = {
-  id: string
+  id: UniqueEntityId
   name: string
   subCategory?: SubCategory1[]
 }
