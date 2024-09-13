@@ -1,4 +1,4 @@
-import { Client } from '@/domain/entities/client'
+import { Client } from '@/domain/entities/client.entity'
 import {
   ClientRequest,
   ClientResponse,

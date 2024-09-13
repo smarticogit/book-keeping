@@ -1,4 +1,4 @@
-import { Statement } from '@/domain/entities/statement'
+import { Statement } from '@/domain/entities/statement.entity'
 import {
   StatementRequest,
   StatementResponse,

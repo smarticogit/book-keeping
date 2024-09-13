@@ -1,4 +1,4 @@
-import { Report } from '@/domain/entities/report'
+import { Report } from '@/domain/entities/report.entity'
 import { faker } from '@faker-js/faker'
 
 export function makeReport(override: Partial<Report> = {}) {

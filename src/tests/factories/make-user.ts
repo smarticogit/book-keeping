@@ -1,4 +1,4 @@
-import { User } from '@/domain/entities/user'
+import { User } from '@/domain/entities/user.entity'
 import { faker } from '@faker-js/faker'
 
 export function makeUser(override: Partial<User> = {}) {

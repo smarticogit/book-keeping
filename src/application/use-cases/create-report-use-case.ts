@@ -1,4 +1,4 @@
-import { Report } from '@/domain/entities/report'
+import { Report } from '@/domain/entities/report.entity'
 import {
   ReportRequest,
   ReportResponse,

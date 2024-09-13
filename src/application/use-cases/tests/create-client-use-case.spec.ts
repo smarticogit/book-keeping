@@ -1,6 +1,6 @@
+import { CreateClientUseCase } from '@/application/use-cases/create-client-use-case'
 import { makeClient } from '@/tests/factories/make-client'
 import { InMemoryClientRepository } from '@/tests/repositories/in-memory-client-repository'
-import { CreateClientUseCase } from '../create-client-use-case'
 
 let inMemoryClientRepository: InMemoryClientRepository
 let sut: CreateClientUseCase

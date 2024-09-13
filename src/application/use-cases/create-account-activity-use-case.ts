@@ -1,4 +1,4 @@
-import { AccountActivity } from '@/domain/entities/account-activity'
+import { AccountActivity } from '@/domain/entities/account-activity.entity'
 import {
   AccountActivityRequest,
   AccountActivityResponse,

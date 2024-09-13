@@ -1,5 +1,5 @@
 import { UserRequest, UserResponse } from '@/domain/entities/types/user.types'
-import { User } from '@/domain/entities/user'
+import { User } from '@/domain/entities/user.entity'
 import { UserRepository } from '@/domain/repositories/user-repository'
 import bcrypt from 'bcrypt'
 
