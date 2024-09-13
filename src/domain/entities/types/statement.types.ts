@@ -1,7 +1,8 @@
+import { UniqueEntityId } from '../core/unique-entity-id'
 import { AccountActivity } from './account-activity.types'
 
 export type Statement = {
-  id: string
+  id: UniqueEntityId
   bankAccountId: string
   statementDate: Date
   fileUrl: string
@@ -12,3 +13,11 @@ export type Statement = {
 }
 
 export type StatementProps = Omit<Statement, 'id'>
+
+export type StatementRequest = {
+  bankAccountId: string
+  statementDate: Date
+  fileUrl: string
+  signedFileUrl: string
+  accountActivity: AccountActivity[]
+}

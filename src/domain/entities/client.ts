@@ -1,9 +1,13 @@
 import { Entity } from './core/entity'
 import { UniqueEntityId } from './core/unique-entity-id'
-import { ClientCreate, ClientProps } from './types/client.types'
+import {
+  ClientProps,
+  ClientRequest,
+  ClientResponse,
+} from './types/client.types'
 
 export class Client extends Entity<ClientProps> {
-  static create(props: ClientCreate, id?: UniqueEntityId) {
+  static create(props: ClientRequest, id?: UniqueEntityId): ClientResponse {
     const client = new Client(
       {
         ...props,

@@ -1,8 +1,9 @@
-import { BankAccount } from './bank-account.types'
+import { UniqueEntityId } from '../core/unique-entity-id'
+import { BankAccountRequest } from './bank-account.types'
 
 type Address = {
   street: string
-  number: string
+  number: number
   complement?: string
   city: string
   state: string
@@ -16,16 +17,28 @@ export type ClientProps = {
   cpf?: string
   cnpj?: string
   address: Address
-  bankAccounts: BankAccount[]
+  bankAccounts: BankAccountRequest[]
   createdAt: Date
   updatedAt: Date
 }
 
-export type ClientCreate = {
+export type ClientRequest = {
   name: string
   email: string
   cpf?: string
   cnpj?: string
   address: Address
-  bankAccounts: BankAccount[]
+  bankAccounts: BankAccountRequest[]
+}
+
+export type ClientResponse = {
+  id: UniqueEntityId
+  name: string
+  email: string
+  cpf?: string
+  cnpj?: string
+  address: Address
+  bankAccounts: BankAccountRequest[]
+  createdAt: Date
+  updatedAt: Date
 }

@@ -1,5 +1,5 @@
-import { Client } from '@/domain/entities/client'
+import { ClientRequest } from '../entities/types/client.types'
 
 export interface ClientRepository {
-  create(client: Client): Promise<void>
+  create(client: ClientRequest): Promise<void>
 }
