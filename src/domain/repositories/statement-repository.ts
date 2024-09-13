@@ -2,9 +2,7 @@ import {
   StatementRequest,
   StatementResponse,
 } from '@/domain/entities/types/statement.types'
-import { BaseRepository } from './base-repository'
 
-export type StatementRepository = BaseRepository<
-  StatementRequest,
-  StatementResponse
->
+export interface StatementRepository {
+  create: (statement: StatementRequest) => Promise<StatementResponse | null>
+}

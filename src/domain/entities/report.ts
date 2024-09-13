@@ -1,17 +1,17 @@
 import { UniqueEntityId } from '@/domain/entities/core/unique-entity-id'
 import { Entity } from './core/entity'
-import { ReportProps } from './types/report.type'
+import { ReportProps, ReportResponse } from './types/report.type'
 
 export class Report extends Entity<ReportProps> {
-  static create(props: ReportProps, id?: UniqueEntityId) {
-    const user = new Report(
+  static create(props: ReportProps, id?: UniqueEntityId): ReportResponse {
+    const report = new Report(
       {
         ...props,
       },
       id,
     )
 
-    return user
+    return report
   }
 
   get clientId() {

@@ -1,4 +1,8 @@
-import { ClientRequest, ClientResponse } from '../entities/types/client.types'
-import { BaseRepository } from './base-repository'
+import {
+  ClientRequest,
+  ClientResponse,
+} from '@/domain/entities/types/client.types'
 
-export type ClientRepository = BaseRepository<ClientRequest, ClientResponse>
+export interface ClientRepository {
+  create: (client: ClientRequest) => Promise<ClientResponse | null>
+}

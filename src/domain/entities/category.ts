@@ -4,14 +4,14 @@ import { CategoryProps } from './types/category.types'
 
 export class Category extends Entity<CategoryProps> {
   static create(props: CategoryProps, id?: UniqueEntityId) {
-    const user = new Category(
+    const category = new Category(
       {
         ...props,
       },
       id,
     )
 
-    return user
+    return category
   }
 
   get name() {

@@ -1,5 +1,7 @@
+import { UniqueEntityId } from '@/domain/entities/core/unique-entity-id'
+
 export type Report = {
-  id: string
+  id: UniqueEntityId
   clientId: string
   bankAccountId: string
 }

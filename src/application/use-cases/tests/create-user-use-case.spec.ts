@@ -11,7 +11,7 @@ describe('Create User', () => {
     sut = new CreateUserUseCase(inMemoryUserRepository)
   })
 
-  it('should be able to a create a user ', async () => {
+  it('should be able to a create a user', async () => {
     const newUser = makeUser()
     const userCreated = await sut.run(newUser)
 

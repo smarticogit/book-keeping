@@ -11,7 +11,7 @@ export class Statement extends Entity<StatementProps> {
     props: StatementRequest,
     id?: UniqueEntityId,
   ): StatementResponse {
-    const bankAccount = new Statement(
+    const statement = new Statement(
       {
         ...props,
         createdAt: new Date(),
@@ -20,7 +20,7 @@ export class Statement extends Entity<StatementProps> {
       id,
     )
 
-    return bankAccount
+    return statement
   }
 
   get bankAccountId() {

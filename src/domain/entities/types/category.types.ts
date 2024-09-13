@@ -22,4 +22,9 @@ export type CategoryRequest = {
   subCategory?: SubCategory1[]
 }
 
+export type CategoryResponse = {
+  name: string
+  subCategory?: SubCategory1[]
+}
+
 export type CategoryProps = Omit<Category, 'id'>

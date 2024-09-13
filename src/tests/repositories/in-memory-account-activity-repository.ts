@@ -1,12 +1,19 @@
-import { AccountActivity } from '@/domain/entities/account-activity'
+import {
+  AccountActivityRequest,
+  AccountActivityResponse,
+} from '@/domain/entities/types/account-activity.types'
 import { AccountActivityRepository } from '@/domain/repositories/account-activity-repository'
 
 export class InMemoryAccountActivityRepository
   implements AccountActivityRepository
 {
-  public items: AccountActivity[] = []
+  public items: AccountActivityRequest[] = []
 
-  async create(user: AccountActivity) {
-    this.items.push(user)
+  async create(
+    accountActivity: AccountActivityRequest,
+  ): Promise<AccountActivityResponse | null> {
+    this.items.push(accountActivity)
+
+    return null
   }
 }
