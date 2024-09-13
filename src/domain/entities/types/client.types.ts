@@ -10,8 +10,7 @@ type Address = {
   country: string
 }
 
-export type Client = {
-  id: string
+export type ClientProps = {
   name: string
   email: string
   cpf?: string
@@ -22,4 +21,11 @@ export type Client = {
   updatedAt: Date
 }
 
-export type ClientProps = Omit<Client, 'id'>
+export type ClientCreate = {
+  name: string
+  email: string
+  cpf?: string
+  cnpj?: string
+  address: Address
+  bankAccounts: BankAccount[]
+}

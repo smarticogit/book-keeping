@@ -1,5 +1,6 @@
-export type User = {
-  id: string
+import { UniqueEntityId } from '@/domain/entities/core/unique-entity-id'
+
+export type UserProps = {
   name: string
   email: string
   password: string
@@ -7,4 +8,17 @@ export type User = {
   active: boolean
 }
 
-export type UserProps = Omit<User, 'id' | 'createdAt' | 'active'>
+export type UserResponse = {
+  id: UniqueEntityId
+  name: string
+  email: string
+  password: string
+  active: boolean
+  createdAt: Date
+}
+
+export type UserRequest = {
+  name: string
+  email: string
+  password: string
+}

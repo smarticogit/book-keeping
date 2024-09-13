@@ -1,12 +1,9 @@
 import { UniqueEntityId } from '@/domain/entities/core/unique-entity-id'
 import { Entity } from './core/entity'
-import { UserProps } from './types/user.types'
+import { UserProps, UserRequest, UserResponse } from './types/user.types'
 
 export class User extends Entity<UserProps> {
-  static create(
-    props: Omit<UserProps, 'createdAt' | 'active'>,
-    id?: UniqueEntityId,
-  ) {
+  static create(props: UserRequest, id?: UniqueEntityId): UserResponse {
     const user = new User(
       {
         ...props,

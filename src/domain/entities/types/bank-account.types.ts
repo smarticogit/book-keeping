@@ -6,7 +6,7 @@ export type BankAccount = {
   accountNumber: string
   branchNumber: string
   accountType: 'checking' | 'savings'
-  statements: Statement[]
+  statements?: Statement[]
   createdAt: Date
 }
 
