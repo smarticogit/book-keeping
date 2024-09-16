@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "tsc-watch --onSuccess \"node dist/index.js\"",
+    "dev": "tsx watch src/server.ts",
+    "start": "node build/server.js",
+    "build": "tsup src --out-dir build",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest --run --coverage",
@@ -35,6 +37,8 @@
     "globals": "^15.9.0",
     "ts-node": "^10.9.2",
     "tsc-watch": "^6.2.0",
+    "tsup": "^8.2.4",
+    "tsx": "^4.19.1",
     "typescript": "^5.6.2",
     "typescript-eslint": "^8.5.0",
     "vite-tsconfig-paths": "^5.0.1",
@@ -47,6 +51,8 @@
     "@aws-sdk/s3-request-presigner": "^3.651.1",
     "bcrypt": "^5.1.1",
     "dotenv": "^16.4.5",
-    "vite": "^5.4.3"
+    "fastify": "^4.28.1",
+    "vite": "^5.4.3",
+    "zod": "^3.23.8"
   }
 }
