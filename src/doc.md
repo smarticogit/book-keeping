@@ -1,8 +1,23 @@
 # Book Keeping
 
-## Project Details
+## Detalhes do Projeto
 
-### Entitys
+### Use Cases
+
+- [ ] Cadastrar usuário
+- [ ] Autenticar Usuário
+
+#### Usuário logado poderá:
+
+- [ ] Cadastrar cliente
+- [ ] Editar dados do cliente
+- [ ] Desativar cliente
+- [ ] Cadastrar extrato bancário
+- [ ] Selecionar categorias ao cadastrar extrato bancário -> atividades da conta
+- [ ] Fazer upload de documentos
+- [ ] Gerar relatórios
+
+### Entidades
 
 ```typescript
 class User = {

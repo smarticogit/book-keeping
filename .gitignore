@@ -13,3 +13,4 @@ package-lock.json
 .terraform/
 .env*
 .serverless*
+/src/files
