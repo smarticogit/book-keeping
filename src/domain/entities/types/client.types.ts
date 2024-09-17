@@ -27,7 +27,7 @@ export type Client = {
   cpf?: string
   cnpj?: string
   address: Address
-  bankAccounts: BankAccount[]
+  bankAccounts?: BankAccount[]
   createdAt: Date
   updatedAt: Date
 }

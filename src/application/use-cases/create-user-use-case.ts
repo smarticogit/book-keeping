@@ -1,20 +1,31 @@
 import { UserRequest, UserResponse } from '@/domain/entities/types/user.types'
 import { User } from '@/domain/entities/user.entity'
 import { UserRepository } from '@/domain/repositories/user-repository'
-import bcrypt from 'bcrypt'
+import { hash } from 'bcryptjs'
+import { UserEmailExistsError } from './erros/user-already-exists-error'
 
 export class CreateUserUseCase {
   constructor(private userRepository: UserRepository) {}
 
-  async run({ name, email, password }: UserRequest): Promise<UserResponse> {
+  async run({
+    name,
+    email,
+    password,
+  }: UserRequest): Promise<UserResponse | null> {
     const user = User.create({ name, email, password })
-    const hashedPassword = await bcrypt.hash(user.password, 8)
+    const hashedPassword = await hash(user.password, 8)
 
-    await this.userRepository.create({
+    const existingUser = await this.userRepository.findByEmail(email)
+
+    if (existingUser) {
+      throw new UserEmailExistsError()
+    }
+
+    const userCreated = await this.userRepository.create({
       ...user,
       password: hashedPassword,
     })
 
-    return user
+    return userCreated
   }
 }
