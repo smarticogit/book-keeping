@@ -15,6 +15,6 @@ describe('Create User', () => {
     const newUser = makeUser()
     const userCreated = await sut.run(newUser)
 
-    expect(userCreated.id).toBeTruthy()
+    expect(userCreated?.id).toBeTruthy()
   })
 })

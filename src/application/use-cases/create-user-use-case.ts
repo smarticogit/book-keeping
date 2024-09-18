@@ -26,6 +26,8 @@ export class CreateUserUseCase {
       password: hashedPassword,
     })
 
-    return userCreated
+    console.log('userCreated', userCreated)
+
+    return user
   }
 }

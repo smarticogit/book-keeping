@@ -10,11 +10,11 @@
     "skipLibCheck": true,
     "sourceMap": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["src/*"]
     },
-    "baseUrl": "./",
+    "baseUrl": ".",
     "types": ["vitest/globals"]
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "main.ts"],
   "exclude": ["node_modules"]
 }

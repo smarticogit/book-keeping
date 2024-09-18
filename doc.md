@@ -17,6 +17,24 @@
 - [ ] Fazer upload de documentos
 - [ ] Gerar relatórios
 
+### Informações do Documento (Statement)
+
+- Nome do banco | Bank Name
+- Nome do cliente | Customer Name
+- Número do cliente | Customer Number
+- Tel. do banco | Phone Number
+- Tipo de conta | Account type
+- Número da conta | Account number
+- Saldo inicial | Beginning balance
+- Saldo final | Ending balance
+- Data do document | Statement date
+- Atividades da conta | Activities Account
+  - Data da atividade | Post Date
+  - Descrição Description
+  - Debits
+  - Credits
+  - Balance
+
 ### Entidades
 
 ```typescript

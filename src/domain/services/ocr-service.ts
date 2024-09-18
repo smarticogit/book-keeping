@@ -1,5 +1,11 @@
-import { StartDocumentAnalysisCommandOutput } from '@aws-sdk/client-textract'
+import { ExpenseDocument } from '@aws-sdk/client-textract'
 
 export interface OCRService {
-  analyze(docName: string): Promise<StartDocumentAnalysisCommandOutput | null>
+  analyze(): Promise<string>
+
+  getResults(
+    jobId: string,
+  ): Promise<ExpenseDocument[] | null | undefined | null>
+
+  run(): Promise<void>
 }
