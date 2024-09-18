@@ -15,6 +15,6 @@
     "baseUrl": ".",
     "types": ["vitest/globals"]
   },
-  "include": ["src/**/*", "main.ts"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules"]
 }
