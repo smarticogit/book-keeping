@@ -1,0 +1,27 @@
+{
+  "bankName": "Fidelity Co-Operative Bank",
+  "customerName": "JOSE SILVA",
+  "customerNumber": "10373",
+  "phoneNumber": "(800) 581-5363",
+  "accountType": "CareFree",
+  "accountNumber": "170203731",
+  "beginningBalance": "$8.36",
+  "endingBalance": "$170.69",
+  "statementDate": "08/31/2024",
+  "activities": [
+    {
+      "postDate": "08/01/2024",
+      "description": "Beginning Balance",
+      "debits": "",
+      "credits": "",
+      "balance": "$8.36"
+    },
+    {
+      "postDate": "08/01/2024",
+      "description": "Point Of Sale Deposit VENMO* SILVA 2211 North First StSan Jose CAUS",
+      "debits": "",
+      "credits": "$78.60",
+      "balance": "$86.96"
+    }
+  ]
+}

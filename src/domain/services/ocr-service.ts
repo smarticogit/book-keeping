@@ -1,11 +1,7 @@
-import { ExpenseDocument } from '@aws-sdk/client-textract'
-
 export interface OCRService {
   analyze(): Promise<string>
 
-  getResults(
-    jobId: string,
-  ): Promise<ExpenseDocument[] | null | undefined | null>
+  getResults(jobId: string): Promise<unknown>
 
   run(): Promise<void>
 }

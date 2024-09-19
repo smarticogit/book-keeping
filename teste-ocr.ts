@@ -1,7 +1,7 @@
-import { OCRTextract } from './src/infra/services/ocr-service'
+import { OCRTextractExpense } from './src/infra/services/ocr-expense-service'
 
 async function runTest() {
-  const ocrService = new OCRTextract()
+  const ocrService = new OCRTextractExpense()
 
   try {
     await ocrService.run()
