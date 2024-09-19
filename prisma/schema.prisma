@@ -6,3 +6,75 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+enum AccountType {
+  checking
+  savings
+}
+
+model Client {
+  id           String        @id @default(uuid())
+  name         String
+  email        String        @unique
+  cpf          String?       @unique
+  cnpj         String?       @unique
+  addressId    String
+  address      Address       @relation(fields: [addressId], references: [id])
+  bankAccounts BankAccount[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Address {
+  id      String   @id @default(uuid())
+  street  String
+  number  String
+  city    String
+  state   String
+  zipCode String
+  country String
+  Client  Client[]
+}
+
+model BankAccount {
+  id            String      @id @default(uuid())
+  clientId      String
+  client        Client      @relation(fields: [clientId], references: [id])
+  bankName      String
+  accountNumber String
+  branchNumber  String
+  accountType   AccountType
+  statements    Statement[]
+}
+
+model Statement {
+  id                String            @id @default(uuid())
+  bankAccountId     String
+  bankAccount       BankAccount       @relation(fields: [bankAccountId], references: [id])
+  statementDate     DateTime
+  fileUrl           String
+  signedFileUrl     String
+  accountActivities AccountActivity[]
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+}
+
+model AccountActivity {
+  id               String     @id @default(uuid())
+  statementId      String
+  statement        Statement  @relation(fields: [statementId], references: [id])
+  postDate         DateTime
+  description      String
+  debit            Float
+  credit           Float
+  balance          Float
+  beginningBalance Float
+  endingBalance    Float
+  categories       Category[] @relation("AccountActivityCategories")
+}
+
+model Category {
+  id                String            @id @default(uuid())
+  name              String
+  accountActivities AccountActivity[] @relation("AccountActivityCategories")
+}

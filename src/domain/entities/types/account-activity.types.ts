@@ -11,7 +11,7 @@ export type AccountActivity = {
   balance: number
   beginningBalance: number
   endingBalance: number
-  category: CategoryRequest[]
+  category?: CategoryRequest[]
 }
 
 export type AccountActivityProps = Omit<AccountActivity, 'id'>
