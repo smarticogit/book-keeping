@@ -15,20 +15,16 @@ export class ProcessOCRUseCase {
       return null
     }
 
-    const result = await this.ocrService.getResults(response.JobId)
+    await this.ocrService.getResults(response.JobId)
 
-    if (!result) {
-      return null
-    }
+    // const data = this.ocrService.dataFormat('./output.json')
 
-    const data = this.ocrService.dataFormat('./output.json')
+    // if (!data) {
+    //   return null
+    // }
 
-    if (!data) {
-      return null
-    }
+    // console.log('data', data)
 
-    console.log('data', data)
-
-    return data
+    return null
   }
 }

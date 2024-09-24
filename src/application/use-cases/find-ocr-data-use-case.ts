@@ -1,6 +1,6 @@
 import { ClientRepository } from '@/domain/repositories/client-repository'
 import { OCRService } from '@/domain/services/ocr-service'
-import { Output } from '@/infra/services/ocr-expense-service'
+import { Output } from '@/infra/services/types'
 
 export class FindOCRDataUseCase {
   constructor(

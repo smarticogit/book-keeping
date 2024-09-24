@@ -2,13 +2,11 @@ import { OCRService } from '@/domain/services/ocr-service'
 import {
   ExpenseDocument,
   ExpenseField,
-  FeatureType,
-  GetDocumentAnalysisCommand,
-  GetDocumentAnalysisCommandInput,
+  GetExpenseAnalysisCommand,
   LineItemFields,
   LineItemGroup,
-  StartDocumentAnalysisCommand,
-  StartDocumentAnalysisCommandOutput,
+  StartExpenseAnalysisCommand,
+  StartExpenseAnalysisCommandOutput,
   TextractClient,
 } from '@aws-sdk/client-textract'
 import fs from 'fs'
@@ -28,27 +26,22 @@ const outputFileName = './output.json'
 export class OCRTextractExpense implements OCRService {
   async analyze(
     statementKey: string,
-  ): Promise<StartDocumentAnalysisCommandOutput> {
+  ): Promise<StartExpenseAnalysisCommandOutput> {
     if (!statementKey) {
       throw new Error('Statement key is required')
     }
 
     try {
-      const command = new StartDocumentAnalysisCommand({
+      const command = new StartExpenseAnalysisCommand({
         DocumentLocation: {
           S3Object: {
             Bucket: env.S3_BUCKET_OCR,
             Name: `${statementKey}.pdf`,
           },
         },
-        FeatureTypes: [FeatureType.FORMS, FeatureType.TABLES],
       })
 
       const response = await textractClient.send(command)
-
-      if (!response.JobId) {
-        throw new Error('Error analyze')
-      }
 
       return response
     } catch (error) {
@@ -57,7 +50,7 @@ export class OCRTextractExpense implements OCRService {
     }
   }
 
-  async getResults(jobId: string): Promise<ExpenseDocument[] | null> {
+  async getResults(jobId: string): Promise<void> {
     let jobStatus = ''
     let expenseDocuments: ExpenseDocument[] = []
     let nextToken: string | undefined
@@ -67,9 +60,9 @@ export class OCRTextractExpense implements OCRService {
     do {
       try {
         const response = await textractClient.send(
-          new GetDocumentAnalysisCommand({
+          new GetExpenseAnalysisCommand({
             JobId: jobId,
-          } as GetDocumentAnalysisCommandInput),
+          }),
         )
         jobStatus = response.JobStatus!
 
@@ -82,7 +75,6 @@ export class OCRTextractExpense implements OCRService {
           if (response.StatusMessage) {
             console.error(`Error message: ${response.StatusMessage}`)
           }
-          return null
         } else {
           await new Promise((resolve) => setTimeout(resolve, 2000))
         }
@@ -95,33 +87,40 @@ export class OCRTextractExpense implements OCRService {
     do {
       try {
         const response = await textractClient.send(
-          new GetDocumentAnalysisCommand({
+          new GetExpenseAnalysisCommand({
             JobId: jobId,
             NextToken: nextToken,
           }),
         )
-
-        expenseDocuments = expenseDocuments.concat(response || [])
-        nextToken = response.NextToken
-
-        fs.writeFileSync(
-          outputFileName,
-          JSON.stringify(expenseDocuments, null, 2),
+        expenseDocuments = expenseDocuments.concat(
+          response.ExpenseDocuments || [],
         )
+        nextToken = response.NextToken
+        fs.writeFileSync(outputFileName, JSON.stringify(response, null, 2))
       } catch (error) {
         console.error('Error getting expense analysis results:', error)
         throw new Error('Error processing expense analysis results')
       }
     } while (nextToken)
 
-    return expenseDocuments
+    console.log('Expense analysis results obtained successfully!')
   }
 
   dataFormat(): Output {
     console.log('starting format...')
 
     const fileContent = fs.readFileSync(outputFileName, 'utf-8')
-    const expenseDocuments: ExpenseDocument[] = JSON.parse(fileContent)
+
+    // Verifique se o conteúdo JSON tem a estrutura correta
+    const parsedContent = JSON.parse(fileContent)
+
+    const expenseDocuments: ExpenseDocument[] =
+      parsedContent.ExpenseDocuments || []
+
+    if (!Array.isArray(expenseDocuments)) {
+      throw new Error('Expected ExpenseDocuments to be an array')
+    }
+
     const extractedData = expenseDocuments.map((doc: ExpenseDocument) => {
       const summaryFields: ExpenseField[] = doc.SummaryFields || []
       const lineItemGroups = doc.LineItemGroups || []
@@ -132,7 +131,6 @@ export class OCRTextractExpense implements OCRService {
         const value = field.ValueDetection?.Text || ''
         summaryData[label] = value
       })
-
       const activities: {
         postDate?: string
         description?: string
@@ -149,11 +147,9 @@ export class OCRTextractExpense implements OCRService {
           let credits = ''
           let balance = ''
           let expenseRow = ''
-
           lineItem.LineItemExpenseFields?.forEach((field: ExpenseField) => {
             const type = field.Type?.Text || ''
             const value = field.ValueDetection?.Text || ''
-
             switch (type.toUpperCase()) {
               case 'DATE':
                 postDate = value
@@ -189,7 +185,6 @@ export class OCRTextractExpense implements OCRService {
               postDate = dateMatch[0]
             }
           }
-
           activities.push({
             postDate: postDate.trim(),
             description: description.trim(),
@@ -199,15 +194,11 @@ export class OCRTextractExpense implements OCRService {
           })
         })
       })
-
       return {
         summaryData,
         activities,
       }
     })
-
-    console.log('ending format...')
-
     return extractedData
   }
 }
