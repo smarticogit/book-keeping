@@ -13,6 +13,7 @@ import {
 } from '@aws-sdk/client-textract'
 import fs from 'fs'
 import { env } from '../../env'
+import { Output } from './types'
 
 const textractClient = new TextractClient({
   region: env.AWS_REGION,
@@ -45,9 +46,6 @@ export class OCRTextractExpense implements OCRService {
 
       const response = await textractClient.send(command)
 
-      console.log('Response here', response)
-      console.log(' Job', response.JobId)
-
       if (!response.JobId) {
         throw new Error('Error analyze')
       }
@@ -59,7 +57,7 @@ export class OCRTextractExpense implements OCRService {
     }
   }
 
-  async getResults(jobId: string) {
+  async getResults(jobId: string): Promise<ExpenseDocument[] | null> {
     let jobStatus = ''
     let expenseDocuments: ExpenseDocument[] = []
     let nextToken: string | undefined
@@ -84,7 +82,7 @@ export class OCRTextractExpense implements OCRService {
           if (response.StatusMessage) {
             console.error(`Error message: ${response.StatusMessage}`)
           }
-          return
+          return null
         } else {
           await new Promise((resolve) => setTimeout(resolve, 2000))
         }
@@ -119,13 +117,16 @@ export class OCRTextractExpense implements OCRService {
     return expenseDocuments
   }
 
-  processExpenseDocuments(expenseDocuments: ExpenseDocument[]) {
+  dataFormat(): Output {
+    console.log('starting format...')
+
+    const fileContent = fs.readFileSync(outputFileName, 'utf-8')
+    const expenseDocuments: ExpenseDocument[] = JSON.parse(fileContent)
     const extractedData = expenseDocuments.map((doc: ExpenseDocument) => {
       const summaryFields: ExpenseField[] = doc.SummaryFields || []
       const lineItemGroups = doc.LineItemGroups || []
       const summaryData: { [key: string]: string } = {}
 
-      // Processando os campos sumários
       summaryFields.forEach((field: ExpenseField) => {
         const label = field.LabelDetection?.Text || ''
         const value = field.ValueDetection?.Text || ''
@@ -140,7 +141,6 @@ export class OCRTextractExpense implements OCRService {
         balance?: string
       }[] = []
 
-      // Processando os itens de linha
       lineItemGroups.forEach((group: LineItemGroup) => {
         group.LineItems?.forEach((lineItem: LineItemFields) => {
           let postDate = ''
@@ -177,15 +177,12 @@ export class OCRTextractExpense implements OCRService {
                 balance = value
                 break
               default:
-                // Outros campos, se necessário
                 break
             }
 
-            // Construindo o EXPENSE_ROW (opcional)
             expenseRow += `${value} `
           })
 
-          // Se não houver postDate, tentar extrair do EXPENSE_ROW
           if (!postDate) {
             const dateMatch = expenseRow.match(/\d{2}\/\d{2}\/\d{4}/)
             if (dateMatch) {
@@ -208,6 +205,8 @@ export class OCRTextractExpense implements OCRService {
         activities,
       }
     })
+
+    console.log('ending format...')
 
     return extractedData
   }
