@@ -1,8 +1,8 @@
 import {
-  ClientRequest,
+  ClientCreateProps,
   ClientResponse,
 } from '@/domain/entities/types/client.types'
 
 export interface ClientRepository {
-  create: (client: ClientRequest) => Promise<ClientResponse | null>
+  create: (client: ClientCreateProps) => Promise<ClientResponse | null>
 }

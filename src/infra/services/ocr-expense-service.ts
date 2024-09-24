@@ -2,12 +2,13 @@ import { OCRService } from '@/domain/services/ocr-service'
 import {
   ExpenseDocument,
   ExpenseField,
-  GetExpenseAnalysisCommand,
-  GetExpenseAnalysisCommandInput,
+  FeatureType,
+  GetDocumentAnalysisCommand,
+  GetDocumentAnalysisCommandInput,
   LineItemFields,
   LineItemGroup,
-  StartExpenseAnalysisCommand,
-  StartExpenseAnalysisCommandInput,
+  StartDocumentAnalysisCommand,
+  StartDocumentAnalysisCommandOutput,
   TextractClient,
 } from '@aws-sdk/client-textract'
 import fs from 'fs'
@@ -21,32 +22,40 @@ const textractClient = new TextractClient({
   },
 })
 
-const docName = '0bf58e74-3778-4ab3-9287-c8f6fe1e6e4f.pdf'
-const outputFileName = 'expense-results.json'
-
-const params: StartExpenseAnalysisCommandInput = {
-  DocumentLocation: {
-    S3Object: {
-      Bucket: env.S3_BUCKET_OCR,
-      Name: docName,
-    },
-  },
-}
+const outputFileName = './output.json'
 
 export class OCRTextractExpense implements OCRService {
-  async analyze(): Promise<string> {
+  async analyze(
+    statementKey: string,
+  ): Promise<StartDocumentAnalysisCommandOutput> {
+    if (!statementKey) {
+      throw new Error('Statement key is required')
+    }
+
     try {
-      const command = new StartExpenseAnalysisCommand(params)
+      const command = new StartDocumentAnalysisCommand({
+        DocumentLocation: {
+          S3Object: {
+            Bucket: env.S3_BUCKET_OCR,
+            Name: `${statementKey}.pdf`,
+          },
+        },
+        FeatureTypes: [FeatureType.FORMS, FeatureType.TABLES],
+      })
+
       const response = await textractClient.send(command)
 
+      console.log('Response here', response)
+      console.log(' Job', response.JobId)
+
       if (!response.JobId) {
-        throw new Error('Error starting expense analysis')
+        throw new Error('Error analyze')
       }
 
-      return response.JobId
+      return response
     } catch (error) {
-      console.error('Error starting expense analysis:', error)
-      throw new Error('Error starting expense analysis')
+      console.error('Error:', error)
+      throw new Error('Error')
     }
   }
 
@@ -60,9 +69,9 @@ export class OCRTextractExpense implements OCRService {
     do {
       try {
         const response = await textractClient.send(
-          new GetExpenseAnalysisCommand({
+          new GetDocumentAnalysisCommand({
             JobId: jobId,
-          } as GetExpenseAnalysisCommandInput),
+          } as GetDocumentAnalysisCommandInput),
         )
         jobStatus = response.JobStatus!
 
@@ -77,7 +86,7 @@ export class OCRTextractExpense implements OCRService {
           }
           return
         } else {
-          await new Promise((resolve) => setTimeout(resolve, 3000))
+          await new Promise((resolve) => setTimeout(resolve, 2000))
         }
       } catch (error) {
         console.error('Error getting expense analysis results:', error)
@@ -88,27 +97,26 @@ export class OCRTextractExpense implements OCRService {
     do {
       try {
         const response = await textractClient.send(
-          new GetExpenseAnalysisCommand({
+          new GetDocumentAnalysisCommand({
             JobId: jobId,
             NextToken: nextToken,
-          } as GetExpenseAnalysisCommandInput),
+          }),
         )
 
-        expenseDocuments = expenseDocuments.concat(
-          response.ExpenseDocuments || [],
-        )
+        expenseDocuments = expenseDocuments.concat(response || [])
         nextToken = response.NextToken
+
+        fs.writeFileSync(
+          outputFileName,
+          JSON.stringify(expenseDocuments, null, 2),
+        )
       } catch (error) {
         console.error('Error getting expense analysis results:', error)
         throw new Error('Error processing expense analysis results')
       }
     } while (nextToken)
 
-    const data = this.processExpenseDocuments(expenseDocuments)
-
-    fs.writeFileSync(outputFileName, JSON.stringify(data, null, 2))
-    console.log('Expense analysis results obtained successfully!')
-    return data
+    return expenseDocuments
   }
 
   processExpenseDocuments(expenseDocuments: ExpenseDocument[]) {
@@ -202,14 +210,5 @@ export class OCRTextractExpense implements OCRService {
     })
 
     return extractedData
-  }
-
-  async run() {
-    try {
-      const jobId = await this.analyze()
-      await this.getResults(jobId)
-    } catch (error) {
-      console.error('Error executing expense analysis:', error)
-    }
   }
 }

@@ -1,34 +1,16 @@
-import { PrismaClient } from '@prisma/client'
+import cors from '@fastify/cors'
+import multipart from '@fastify/multipart'
 import fastify from 'fastify'
 import { routes } from './http/routes'
 
-export const app = fastify()
+export const app = fastify({
+  bodyLimit: 104857600,
+})
 
-const prisma = new PrismaClient()
+app.register(multipart)
 
-prisma.client.create({
-  data: {
-    name: 'John Doe',
-    email: 'qXj5Z@example.com',
-    bankAccounts: {
-      create: {
-        bankName: 'Bank Name',
-        accountNumber: 'Account Number',
-        branchNumber: 'Branch Number',
-        accountType: 'checking',
-      },
-    },
-    address: {
-      create: {
-        street: 'Street',
-        number: '123',
-        city: 'City',
-        state: 'State',
-        country: 'Country',
-        zipCode: 'ZipCode',
-      },
-    },
-  },
+app.register(cors, {
+  origin: '*',
 })
 
 app.register(routes)

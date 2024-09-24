@@ -1,18 +1,34 @@
-import { Client } from '@/domain/entities/client.entity'
 import {
   ClientRequest,
   ClientResponse,
 } from '@/domain/entities/types/client.types'
 import { ClientRepository } from '@/domain/repositories/client-repository'
+import { OCRService } from '@/domain/services/ocr-service'
+import { S3StorageService } from '@/infra/services/s3-storage-service'
 
 export class CreateClientUseCase {
-  constructor(private clientRepository: ClientRepository) {}
+  constructor(
+    private clientRepository: ClientRepository,
+    private ocrService: OCRService,
+    private s3Service: S3StorageService,
+  ) {}
 
-  async run({ ...input }: ClientRequest): Promise<ClientResponse> {
-    const client = Client.create(input)
+  async run({ ...input }: ClientRequest): Promise<ClientResponse | null> {
+    const uploadKey = await this.s3Service.upload(input.statementFile)
 
-    await this.clientRepository.create(client)
+    if (!uploadKey) {
+      return null
+    }
 
-    return client
+    const clientCreated = await this.clientRepository.create({
+      ...input,
+      statementKey: uploadKey,
+    })
+
+    if (!clientCreated) {
+      return null
+    }
+
+    return clientCreated
   }
 }

@@ -1,3 +1,3 @@
 export interface StorageService {
-  upload(file: string): Promise<string | null>
+  upload(file: Buffer): Promise<string | null>
 }

@@ -1,54 +1,71 @@
-import { Entity } from './core/entity'
 import { UniqueEntityId } from './core/unique-entity-id'
-import {
-  ClientProps,
-  ClientRequest,
-  ClientResponse,
-} from './types/client.types'
+import { BankAccountRequest } from './types/bank-account.types'
+import { Address } from './types/client.types'
 
-export class Client extends Entity<ClientProps> {
-  static create(props: ClientRequest, id?: UniqueEntityId): ClientResponse {
-    const client = new Client(
-      {
-        ...props,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      id,
-    )
+export class Client {
+  private _id: UniqueEntityId
+  private _name: string
+  private _email: string
+  private _cpf?: string
+  private _cnpj?: string
+  private _address?: Address
+  private _bankAccounts?: BankAccountRequest[]
+  private _createdAt: Date
+  private _updatedAt: Date
 
-    return client
+  constructor(props: {
+    id?: UniqueEntityId
+    name: string
+    email: string
+    cpf?: string
+    cnpj?: string
+    address?: Address
+    bankAccounts?: BankAccountRequest[]
+  }) {
+    this._id = props.id ?? new UniqueEntityId()
+    this._name = props.name
+    this._email = props.email
+    this._cpf = props.cpf
+    this._cnpj = props.cnpj
+    this._address = props.address
+    this._bankAccounts = []
+    this._createdAt = new Date()
+    this._updatedAt = new Date()
+  }
+
+  get id() {
+    return this._id
   }
 
   get name() {
-    return this.props.name
+    return this._name
   }
 
   get email() {
-    return this.props.email
+    return this._email
   }
 
   get cpf() {
-    return this.props.cpf
+    return this._cpf
   }
 
   get cnpj() {
-    return this.props.cnpj
+    return this._cnpj
   }
 
   get address() {
-    return this.props.address
+    return this._address
   }
 
   get bankAccounts() {
-    return this.props.bankAccounts
+    return this._bankAccounts
   }
 
   get createdAt() {
-    return this.props.createdAt
+    return this._createdAt
   }
 
   get updatedAt() {
-    return this.props.updatedAt
+    return this._updatedAt
   }
 }

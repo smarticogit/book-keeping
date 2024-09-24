@@ -1,7 +1,7 @@
+import { StartDocumentAnalysisCommandOutput } from '@aws-sdk/client-textract'
+
 export interface OCRService {
-  analyze(): Promise<string>
+  analyze(statementKey: string): Promise<StartDocumentAnalysisCommandOutput>
 
   getResults(jobId: string): Promise<unknown>
-
-  run(): Promise<void>
 }

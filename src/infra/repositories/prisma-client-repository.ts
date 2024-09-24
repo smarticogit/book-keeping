@@ -1,15 +1,30 @@
-import { ClientRequest } from '@/domain/entities/types/client.types'
+import {
+  ClientCreateProps,
+  ClientResponse,
+} from '@/domain/entities/types/client.types'
 import { ClientRepository } from '@/domain/repositories/client-repository'
+import { prisma } from '../../lib/prisma'
 
 export class PrismaClientRepository implements ClientRepository {
-  async findByEmail(email: string) {
-    console.log('email', email)
+  async create({
+    bankName,
+    email,
+    name,
+    statementDate,
+    statementFile,
+    statementKey,
+  }: ClientCreateProps): Promise<ClientResponse | null> {
+    const clientCreated = await prisma.client.create({
+      data: {
+        name,
+        email,
+        bankName,
+        statementDate,
+        statementFile,
+        statementKey,
+      },
+    })
 
-    return null
-  }
-
-  async create(client: ClientRequest) {
-    console.log('client', client)
-    return null
+    return clientCreated
   }
 }
