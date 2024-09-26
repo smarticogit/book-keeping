@@ -6,26 +6,13 @@ export async function createClientController(
   request: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const { name, email, bankName, statementDate, statementFile } =
-    request.body as {
-      name: string
-      email: string
-      bankName: string
-      statementDate: string
-      statementFile: string
-    }
-
-  const date = new Date(statementDate)
-  if (isNaN(date.getTime())) {
-    return reply.status(400).send({ message: 'Invalid date format' })
-  }
+  const { name, email, doc, statements } = request.body as ClientRequest
 
   const inputData: ClientRequest = {
     name,
     email,
-    bankName,
-    statementDate: new Date(statementDate),
-    statementFile: Buffer.from(statementFile, 'base64'),
+    doc,
+    statements: statements || [],
   }
 
   const createClientUseCase = makeCreateClientUseCase()
@@ -33,3 +20,11 @@ export async function createClientController(
 
   return reply.status(201).send(client)
 }
+
+// const inputData: ClientRequest = {
+//   name,
+//   email,
+//   bankName,
+//   statementDate: new Date(statementDate),
+//   statementFile: Buffer.from(statementFile, 'base64'),
+// }

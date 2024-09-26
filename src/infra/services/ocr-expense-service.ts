@@ -11,7 +11,7 @@ import {
 } from '@aws-sdk/client-textract'
 import fs from 'fs'
 import { env } from '../../env'
-import { Output } from './types'
+import { ExtractedData } from './types'
 
 const textractClient = new TextractClient({
   region: env.AWS_REGION,
@@ -106,14 +106,11 @@ export class OCRTextractExpense implements OCRService {
     console.log('Expense analysis results obtained successfully!')
   }
 
-  dataFormat(): Output {
+  dataFormat(): ExtractedData | null {
     console.log('starting format...')
 
     const fileContent = fs.readFileSync(outputFileName, 'utf-8')
-
-    // Verifique se o conteúdo JSON tem a estrutura correta
     const parsedContent = JSON.parse(fileContent)
-
     const expenseDocuments: ExpenseDocument[] =
       parsedContent.ExpenseDocuments || []
 
@@ -121,23 +118,66 @@ export class OCRTextractExpense implements OCRService {
       throw new Error('Expected ExpenseDocuments to be an array')
     }
 
-    const extractedData = expenseDocuments.map((doc: ExpenseDocument) => {
+    // Variáveis para armazenar informações do cliente
+    let bankName = ''
+    let customerName = ''
+    let customerNumber = ''
+    let phoneNumber = ''
+    let accountType = ''
+    let accountNumber = ''
+    let beginningBalance = ''
+    let endingBalance = ''
+    let statementDate = ''
+
+    const activities: {
+      postDate?: string
+      description?: string
+      debits?: string
+      credits?: string
+      balance?: string
+    }[] = []
+
+    expenseDocuments.forEach((doc: ExpenseDocument) => {
       const summaryFields: ExpenseField[] = doc.SummaryFields || []
       const lineItemGroups = doc.LineItemGroups || []
-      const summaryData: { [key: string]: string } = {}
 
       summaryFields.forEach((field: ExpenseField) => {
         const label = field.LabelDetection?.Text || ''
         const value = field.ValueDetection?.Text || ''
-        summaryData[label] = value
+
+        // Atribuir os campos relevantes às variáveis apropriadas
+        switch (label.toUpperCase()) {
+          case 'BANK NAME':
+            bankName = value
+            break
+          case 'CUSTOMER NUMBER:':
+            customerNumber = value
+            break
+          case 'PHONE NUMBER':
+            phoneNumber = value
+            break
+          case 'ACCOUNT TYPE':
+            accountType = value
+            break
+          case 'ACCOUNT NUMBER':
+            accountNumber = value
+            break
+          case 'BEGINNING BALANCE':
+            beginningBalance = value
+            break
+          case 'ENDING BALANCE':
+            endingBalance = value
+            break
+          case 'STATEMENT ENDING':
+            statementDate = value
+            break
+          default:
+            if (label.includes('CUSTOMER')) {
+              customerName = value
+            }
+            break
+        }
       })
-      const activities: {
-        postDate?: string
-        description?: string
-        debits?: string
-        credits?: string
-        balance?: string
-      }[] = []
 
       lineItemGroups.forEach((group: LineItemGroup) => {
         group.LineItems?.forEach((lineItem: LineItemFields) => {
@@ -147,9 +187,11 @@ export class OCRTextractExpense implements OCRService {
           let credits = ''
           let balance = ''
           let expenseRow = ''
+
           lineItem.LineItemExpenseFields?.forEach((field: ExpenseField) => {
             const type = field.Type?.Text || ''
             const value = field.ValueDetection?.Text || ''
+
             switch (type.toUpperCase()) {
               case 'DATE':
                 postDate = value
@@ -185,6 +227,7 @@ export class OCRTextractExpense implements OCRService {
               postDate = dateMatch[0]
             }
           }
+
           activities.push({
             postDate: postDate.trim(),
             description: description.trim(),
@@ -194,11 +237,19 @@ export class OCRTextractExpense implements OCRService {
           })
         })
       })
-      return {
-        summaryData,
-        activities,
-      }
     })
-    return extractedData
+
+    return {
+      bankName,
+      customerName,
+      customerNumber,
+      phoneNumber,
+      accountType,
+      accountNumber,
+      beginningBalance,
+      endingBalance,
+      statementDate,
+      activities,
+    }
   }
 }

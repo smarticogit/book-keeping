@@ -1,17 +1,50 @@
 import { UniqueEntityId } from '@/domain/entities/core/unique-entity-id'
-import { AccountActivityRequest } from './account-activity.types'
+
+export type CategoryRequest = {
+  name: string
+}
+
+export type AccountActivity = {
+  id: UniqueEntityId
+  statementId: string
+  postDate: Date
+  description: string
+  debit: number
+  credit: number
+  balance: number
+  beginningBalance: number
+  endingBalance: number
+  category?: CategoryRequest[]
+}
 
 export type Statement = {
-  id: UniqueEntityId
-  bankAccountId: string
+  id: string
+  clientId: string
+  bankName: string
   statementDate: Date
-  fileUrl: string
-  signedFileUrl: string
-  accountActivity?: AccountActivityRequest[]
+  statementFile: Buffer
+  statementKey: string
+  accountActivity?: AccountActivity[]
+  createdAt: Date
+  updatedAt: Date
+}
+
+export type StatementResponse = {
+  id: string
+  clientId: string
+  bankName: string
+  statementDate: Date
+  accountActivity?: AccountActivity[]
   createdAt: Date
   updatedAt: Date
 }
 
 export type StatementProps = Omit<Statement, 'id'>
-export type StatementRequest = Omit<StatementProps, 'createdAt' | 'updatedAt'>
-export type StatementResponse = Statement
+
+export type StatementRequest = {
+  clientId: string
+  bankName: string
+  statementDate?: Date
+  statementFile: Buffer
+  statementKey?: string
+}

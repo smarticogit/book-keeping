@@ -16,7 +16,7 @@
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
     "prisma": "prisma generate && prisma migrate dev --name init",
-    "db": "docker-compose up --build"
+    "db": "docker-compose up --build -d"
   },
   "keywords": [],
   "author": "",

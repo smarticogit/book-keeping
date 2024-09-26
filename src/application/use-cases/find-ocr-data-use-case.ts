@@ -17,6 +17,6 @@ export class FindOCRDataUseCase {
 
     console.log('data', data)
 
-    return data
+    return null
   }
 }
