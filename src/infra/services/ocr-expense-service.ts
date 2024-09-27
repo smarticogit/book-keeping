@@ -3,6 +3,7 @@ import {
   ExpenseDocument,
   ExpenseField,
   GetExpenseAnalysisCommand,
+  GetExpenseAnalysisCommandOutput,
   LineItemFields,
   LineItemGroup,
   StartExpenseAnalysisCommand,
@@ -36,11 +37,10 @@ export class OCRTextractExpense implements OCRService {
         DocumentLocation: {
           S3Object: {
             Bucket: env.S3_BUCKET_OCR,
-            Name: `${statementKey}.pdf`,
+            Name: statementKey,
           },
         },
       })
-
       const response = await textractClient.send(command)
 
       return response
@@ -50,10 +50,11 @@ export class OCRTextractExpense implements OCRService {
     }
   }
 
-  async getResults(jobId: string): Promise<void> {
+  async getResults(jobId: string): Promise<GetExpenseAnalysisCommandOutput> {
     let jobStatus = ''
     let expenseDocuments: ExpenseDocument[] = []
     let nextToken: string | undefined
+    let results: GetExpenseAnalysisCommandOutput | null = null
 
     console.log('Getting expense analysis results...')
 
@@ -71,15 +72,12 @@ export class OCRTextractExpense implements OCRService {
         if (jobStatus === 'SUCCEEDED') {
           break
         } else if (jobStatus === 'FAILED') {
-          console.error('Expense analysis job failed.')
-          if (response.StatusMessage) {
-            console.error(`Error message: ${response.StatusMessage}`)
-          }
+          console.error(`Error message: ${response.StatusMessage}`)
+          throw new Error('Expense analysis job failed.')
         } else {
-          await new Promise((resolve) => setTimeout(resolve, 2000))
+          await new Promise((resolve) => setTimeout(resolve, 3000))
         }
       } catch (error) {
-        console.error('Error getting expense analysis results:', error)
         throw new Error('Error getting expense analysis results')
       }
     } while (jobStatus !== 'SUCCEEDED' && jobStatus !== 'FAILED')
@@ -97,28 +95,32 @@ export class OCRTextractExpense implements OCRService {
         )
         nextToken = response.NextToken
         fs.writeFileSync(outputFileName, JSON.stringify(response, null, 2))
+        results = response
       } catch (error) {
         console.error('Error getting expense analysis results:', error)
         throw new Error('Error processing expense analysis results')
       }
     } while (nextToken)
 
-    console.log('Expense analysis results obtained successfully!')
+    return results
   }
 
-  dataFormat(): ExtractedData | null {
+  dataFormat(
+    parsedContent: GetExpenseAnalysisCommandOutput,
+  ): ExtractedData | null {
+    if (!parsedContent) {
+      throw new Error('Parsed content is required')
+    }
+
     console.log('starting format...')
 
-    const fileContent = fs.readFileSync(outputFileName, 'utf-8')
-    const parsedContent = JSON.parse(fileContent)
     const expenseDocuments: ExpenseDocument[] =
       parsedContent.ExpenseDocuments || []
 
     if (!Array.isArray(expenseDocuments)) {
-      throw new Error('Expected ExpenseDocuments to be an array')
+      throw new Error('Esperado que ExpenseDocuments seja um array')
     }
 
-    // Variáveis para armazenar informações do cliente
     let bankName = ''
     let customerName = ''
     let customerNumber = ''
@@ -140,12 +142,12 @@ export class OCRTextractExpense implements OCRService {
     expenseDocuments.forEach((doc: ExpenseDocument) => {
       const summaryFields: ExpenseField[] = doc.SummaryFields || []
       const lineItemGroups = doc.LineItemGroups || []
+      console.log('array -> ', doc)
 
       summaryFields.forEach((field: ExpenseField) => {
         const label = field.LabelDetection?.Text || ''
         const value = field.ValueDetection?.Text || ''
 
-        // Atribuir os campos relevantes às variáveis apropriadas
         switch (label.toUpperCase()) {
           case 'BANK NAME':
             bankName = value

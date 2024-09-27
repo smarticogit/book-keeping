@@ -1,10 +1,13 @@
 import { ExtractedData } from '@/infra/services/types'
-import { StartExpenseAnalysisCommandOutput } from '@aws-sdk/client-textract'
+import {
+  GetExpenseAnalysisCommandOutput,
+  StartExpenseAnalysisCommandOutput,
+} from '@aws-sdk/client-textract'
 
 export interface OCRService {
   analyze(statementKey: string): Promise<StartExpenseAnalysisCommandOutput>
-
-  getResults(jobId: string): Promise<void>
-
-  dataFormat(filePath: string): ExtractedData | null
+  getResults(jobId: string): Promise<GetExpenseAnalysisCommandOutput>
+  dataFormat(
+    parsedContent: GetExpenseAnalysisCommandOutput,
+  ): ExtractedData | null
 }

@@ -23,35 +23,26 @@ export class PrismaClientRepository implements ClientRepository {
       where: {
         id,
       },
+      include: {
+        statements: {
+          select: {
+            id: true,
+            bankName: true,
+            statementDate: true,
+            statementKey: true,
+            clientId: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
+      },
     })
 
     return client
   }
 
   async findAll(): Promise<ClientResponse[] | null> {
-    const clients = await prisma.client.findMany({
-      include: {
-        statements: true,
-      },
-    })
-    return (
-      clients.map((client) => ({
-        id: client.id,
-        name: client.name,
-        doc: client.doc,
-        email: client.email,
-        statements:
-          client.statements?.map((statement) => ({
-            id: statement.id,
-            clientId: statement.clientId,
-            bankName: statement.bankName,
-            statementDate: statement.statementDate || new Date(),
-            createdAt: statement.createdAt,
-            updatedAt: statement.updatedAt,
-          })) || [],
-        createdAt: client.createdAt,
-        updatedAt: client.updatedAt,
-      })) || null
-    )
+    const clients = await prisma.client.findMany({})
+    return clients
   }
 }

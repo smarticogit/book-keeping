@@ -7,7 +7,9 @@ export const app = fastify({
   bodyLimit: 104857600,
 })
 
-app.register(multipart)
+app.register(multipart, {
+  attachFieldsToBody: true,
+})
 
 app.register(cors, {
   origin: '*',

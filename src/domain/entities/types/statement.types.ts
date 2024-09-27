@@ -33,7 +33,7 @@ export type StatementResponse = {
   id: string
   clientId: string
   bankName: string
-  statementDate: Date
+  statementDate: Date | null
   accountActivity?: AccountActivity[]
   createdAt: Date
   updatedAt: Date
