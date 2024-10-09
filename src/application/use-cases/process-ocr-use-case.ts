@@ -9,13 +9,11 @@ export class ProcessOCRUseCase {
   ) {}
 
   async run(statementKey: string): Promise<Output | null> {
-    const response = await this.ocrService.analyze(statementKey)
+    const response = await this.ocrService.analyzeExpense(statementKey)
 
     if (!response.JobId) {
       return null
     }
-
-    await this.ocrService.getResults(response.JobId)
 
     // const data = this.ocrService.dataFormat('./output.json')
 

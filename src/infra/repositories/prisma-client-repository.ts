@@ -30,6 +30,13 @@ export class PrismaClientRepository implements ClientRepository {
             bankName: true,
             statementDate: true,
             statementKey: true,
+            accountType: true,
+            accountNumber: true,
+            customerName: true,
+            customerNumber: true,
+            beginningBalance: true,
+            endingBalance: true,
+            accountActivity: true,
             clientId: true,
             createdAt: true,
             updatedAt: true,
@@ -38,7 +45,7 @@ export class PrismaClientRepository implements ClientRepository {
       },
     })
 
-    return client
+    return client as ClientResponse
   }
 
   async findAll(): Promise<ClientResponse[] | null> {

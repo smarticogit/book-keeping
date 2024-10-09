@@ -9,7 +9,7 @@ export class FindOCRDataUseCase {
   ) {}
 
   async run(): Promise<Output | null> {
-    const data = this.ocrService.dataFormat('./output.json')
+    const data = this.ocrService.dataFormat()
 
     if (!data) {
       return null

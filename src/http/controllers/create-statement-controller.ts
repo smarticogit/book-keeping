@@ -28,10 +28,14 @@ export async function createStatementController(
   const bankNameValue = input.bankName.value
 
   const sendData: StatementRequest = {
+    ...input,
     clientId: clientIdValue,
     bankName: bankNameValue,
-    statementDate: new Date(),
+    statementDate: '',
+    accountNumber: '',
+    accountType: '',
     statementFile: fileBuffer,
+    statementKey: '',
   }
 
   await CreateStatementUseCase.run(sendData)

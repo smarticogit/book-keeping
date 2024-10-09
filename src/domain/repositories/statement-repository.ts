@@ -1,10 +1,11 @@
 import {
   StatementRequest,
   StatementResponse,
+  StatementUpdate,
 } from '@/domain/entities/types/statement.types'
-import { Statement } from '@prisma/client'
 
 export interface StatementRepository {
   create: (statement: StatementRequest) => Promise<StatementResponse | null>
-  findById: (statementId: string) => Promise<Statement | null>
+  findById: (statementId: string) => Promise<StatementResponse | null>
+  update: (statement: StatementUpdate) => Promise<StatementResponse | null>
 }

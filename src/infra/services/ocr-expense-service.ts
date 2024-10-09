@@ -1,18 +1,21 @@
+import {
+  AccountActivityUpdate,
+  StatementUpdate,
+} from '@/domain/entities/types/statement.types'
 import { OCRService } from '@/domain/services/ocr-service'
 import {
-  ExpenseDocument,
-  ExpenseField,
+  Block,
+  FeatureType,
+  GetDocumentAnalysisCommand,
+  GetDocumentAnalysisCommandOutput,
   GetExpenseAnalysisCommand,
   GetExpenseAnalysisCommandOutput,
-  LineItemFields,
-  LineItemGroup,
+  StartDocumentAnalysisCommand,
   StartExpenseAnalysisCommand,
-  StartExpenseAnalysisCommandOutput,
   TextractClient,
 } from '@aws-sdk/client-textract'
 import fs from 'fs'
 import { env } from '../../env'
-import { ExtractedData } from './types'
 
 const textractClient = new TextractClient({
   region: env.AWS_REGION,
@@ -22,12 +25,66 @@ const textractClient = new TextractClient({
   },
 })
 
-const outputFileName = './output.json'
-
 export class OCRTextractExpense implements OCRService {
-  async analyze(
+  async analyzeDocument(
     statementKey: string,
-  ): Promise<StartExpenseAnalysisCommandOutput> {
+  ): Promise<GetDocumentAnalysisCommandOutput | null> {
+    if (!statementKey) {
+      throw new Error('Statement key is required')
+    }
+    const input = {
+      DocumentLocation: {
+        S3Object: {
+          Bucket: env.S3_BUCKET_OCR,
+          Name: statementKey,
+        },
+      },
+      FeatureTypes: [FeatureType.TABLES, FeatureType.FORMS],
+    }
+
+    const command = new StartDocumentAnalysisCommand(input)
+    const response = await textractClient.send(command)
+
+    if (!response.JobId) {
+      throw new Error('Análise falhou')
+    }
+    let jobStatus = ''
+    let analysisResult: GetDocumentAnalysisCommandOutput | null = null
+
+    do {
+      try {
+        analysisResult = await textractClient.send(
+          new GetDocumentAnalysisCommand({
+            JobId: response.JobId!,
+          }),
+        )
+
+        jobStatus = analysisResult.JobStatus!
+        console.log('jobStatus Document... ->', jobStatus)
+
+        if (jobStatus === 'SUCCEEDED') {
+          break
+        } else if (jobStatus === 'FAILED') {
+          throw new Error('Expense analysis job failed.')
+        } else {
+          await new Promise((resolve) => setTimeout(resolve, 5000))
+        }
+      } catch (error) {
+        console.log('Error getting expense analysis results:', error)
+        throw new Error('Error getting expense analysis results')
+      }
+    } while (jobStatus !== 'SUCCEEDED' && jobStatus !== 'FAILED')
+
+    fs.writeFileSync('./document.json', JSON.stringify(analysisResult, null, 2))
+
+    return analysisResult
+
+    // console.log('Generated document.json with success')
+  }
+
+  async analyzeExpense(
+    statementKey: string,
+  ): Promise<GetExpenseAnalysisCommandOutput> {
     if (!statementKey) {
       throw new Error('Statement key is required')
     }
@@ -41,217 +98,200 @@ export class OCRTextractExpense implements OCRService {
           },
         },
       })
-      const response = await textractClient.send(command)
 
-      return response
+      const response = await textractClient.send(command)
+      let jobStatus = ''
+      let analysisResult: GetExpenseAnalysisCommandOutput
+
+      do {
+        console.log('jobStatus Expense... ->', jobStatus)
+
+        try {
+          analysisResult = await textractClient.send(
+            new GetExpenseAnalysisCommand({
+              JobId: response.JobId!,
+            }),
+          )
+
+          jobStatus = analysisResult.JobStatus!
+
+          if (jobStatus === 'SUCCEEDED') {
+            break
+          } else if (jobStatus === 'FAILED') {
+            throw new Error('Expense analysis job failed.')
+          } else {
+            await new Promise((resolve) => setTimeout(resolve, 5000))
+          }
+        } catch (error) {
+          console.log('Error getting expense analysis results:', error)
+          throw new Error('Error getting expense analysis results')
+        }
+      } while (jobStatus !== 'SUCCEEDED' && jobStatus !== 'FAILED')
+
+      fs.writeFileSync(
+        './expense.json',
+        JSON.stringify(analysisResult, null, 2),
+      )
+
+      return analysisResult
     } catch (error) {
       console.error('Error:', error)
       throw new Error('Error')
     }
   }
 
-  async getResults(jobId: string): Promise<GetExpenseAnalysisCommandOutput> {
-    let jobStatus = ''
-    let expenseDocuments: ExpenseDocument[] = []
-    let nextToken: string | undefined
-    let results: GetExpenseAnalysisCommandOutput | null = null
+  dataFormat(input: GetDocumentAnalysisCommandOutput): StatementUpdate {
+    // const rawData = fs.readFileSync('./document.json', 'utf8')
+    const data: GetDocumentAnalysisCommandOutput = input
 
-    console.log('Getting expense analysis results...')
+    if (!data || !data.Blocks) {
+      throw new Error('No data found in analysis result')
+    }
 
-    do {
-      try {
-        const response = await textractClient.send(
-          new GetExpenseAnalysisCommand({
-            JobId: jobId,
-          }),
-        )
-        jobStatus = response.JobStatus!
+    const blockMap: Record<string, Block> = {}
+    data.Blocks.forEach((block) => {
+      if (block.Id) {
+        console.log(`Block Id: ${(blockMap[block.Id] = block)}`)
 
-        console.log(`Status: ${jobStatus}...`)
+        blockMap[block.Id] = block
+      }
+    })
 
-        if (jobStatus === 'SUCCEEDED') {
-          break
-        } else if (jobStatus === 'FAILED') {
-          console.error(`Error message: ${response.StatusMessage}`)
-          throw new Error('Expense analysis job failed.')
-        } else {
-          await new Promise((resolve) => setTimeout(resolve, 3000))
+    const keyValuePairs: Record<string, string> = {}
+
+    data.Blocks.forEach((block) => {
+      if (
+        block.BlockType === 'KEY_VALUE_SET' &&
+        block.EntityTypes?.includes('KEY')
+      ) {
+        const keyText = this.findText(block, blockMap)
+
+        const valueId = block.Relationships?.find((rel) => rel.Type === 'VALUE')
+          ?.Ids?.[0]
+
+        if (valueId && blockMap[valueId]) {
+          const valueBlock = blockMap[valueId]
+          const valueText = this.findText(valueBlock, blockMap)
+
+          keyValuePairs[keyText.toLowerCase()] = valueText
+          console.log(`-->${valueText}`)
         }
-      } catch (error) {
-        throw new Error('Error getting expense analysis results')
       }
-    } while (jobStatus !== 'SUCCEEDED' && jobStatus !== 'FAILED')
+    })
 
-    do {
-      try {
-        const response = await textractClient.send(
-          new GetExpenseAnalysisCommand({
-            JobId: jobId,
-            NextToken: nextToken,
-          }),
-        )
-        expenseDocuments = expenseDocuments.concat(
-          response.ExpenseDocuments || [],
-        )
-        nextToken = response.NextToken
-        fs.writeFileSync(outputFileName, JSON.stringify(response, null, 2))
-        results = response
-      } catch (error) {
-        console.error('Error getting expense analysis results:', error)
-        throw new Error('Error processing expense analysis results')
-      }
-    } while (nextToken)
+    const customerName =
+      Object.keys(keyValuePairs).find(
+        (key) =>
+          key.toLowerCase().includes('customer') ||
+          key.toLowerCase().includes('name'),
+      ) || ''
 
-    return results
+    const Statement: StatementUpdate = {
+      id: '',
+      bankName: keyValuePairs['bank name'] || '',
+      customerName: keyValuePairs[customerName.toLowerCase()] || '',
+      customerNumber: keyValuePairs['customer number']
+        ? keyValuePairs['customer number'].split(':')[1].split("'")[0]
+        : '',
+      accountType: keyValuePairs['account type'] || '',
+      accountNumber:
+        keyValuePairs['account number'] || keyValuePairs['account #'] || '',
+      beginningBalance: keyValuePairs['beginning balance'] || '',
+      endingBalance: keyValuePairs['ending balance'] || '',
+      statementDate:
+        keyValuePairs['statement date'] ||
+        keyValuePairs['statement ending'] ||
+        '',
+      accountActivity: [],
+    }
+
+    return Statement
   }
 
-  dataFormat(
-    parsedContent: GetExpenseAnalysisCommandOutput,
-  ): ExtractedData | null {
-    if (!parsedContent) {
-      throw new Error('Parsed content is required')
-    }
+  findText(block: Block, blockMap: Record<string, Block>): string {
+    if (block.Text) return block.Text
 
-    console.log('starting format...')
-
-    const expenseDocuments: ExpenseDocument[] =
-      parsedContent.ExpenseDocuments || []
-
-    if (!Array.isArray(expenseDocuments)) {
-      throw new Error('Esperado que ExpenseDocuments seja um array')
-    }
-
-    let bankName = ''
-    let customerName = ''
-    let customerNumber = ''
-    let phoneNumber = ''
-    let accountType = ''
-    let accountNumber = ''
-    let beginningBalance = ''
-    let endingBalance = ''
-    let statementDate = ''
-
-    const activities: {
-      postDate?: string
-      description?: string
-      debits?: string
-      credits?: string
-      balance?: string
-    }[] = []
-
-    expenseDocuments.forEach((doc: ExpenseDocument) => {
-      const summaryFields: ExpenseField[] = doc.SummaryFields || []
-      const lineItemGroups = doc.LineItemGroups || []
-      console.log('array -> ', doc)
-
-      summaryFields.forEach((field: ExpenseField) => {
-        const label = field.LabelDetection?.Text || ''
-        const value = field.ValueDetection?.Text || ''
-
-        switch (label.toUpperCase()) {
-          case 'BANK NAME':
-            bankName = value
-            break
-          case 'CUSTOMER NUMBER:':
-            customerNumber = value
-            break
-          case 'PHONE NUMBER':
-            phoneNumber = value
-            break
-          case 'ACCOUNT TYPE':
-            accountType = value
-            break
-          case 'ACCOUNT NUMBER':
-            accountNumber = value
-            break
-          case 'BEGINNING BALANCE':
-            beginningBalance = value
-            break
-          case 'ENDING BALANCE':
-            endingBalance = value
-            break
-          case 'STATEMENT ENDING':
-            statementDate = value
-            break
-          default:
-            if (label.includes('CUSTOMER')) {
-              customerName = value
-            }
-            break
-        }
+    if (block.Relationships) {
+      const textParts: string[] = []
+      block.Relationships.forEach((relationship) => {
+        relationship.Ids?.forEach((id) => {
+          const childBlock = blockMap[id]
+          if (childBlock?.Text) {
+            textParts.push(childBlock.Text)
+          }
+        })
       })
+      return textParts.join(' ')
+    }
+    return ''
+  }
 
-      lineItemGroups.forEach((group: LineItemGroup) => {
-        group.LineItems?.forEach((lineItem: LineItemFields) => {
-          let postDate = ''
-          let description = ''
-          let debits = ''
-          let credits = ''
-          let balance = ''
-          let expenseRow = ''
+  dataFormatExpense(
+    input: GetExpenseAnalysisCommandOutput,
+  ): AccountActivityUpdate[] {
+    // const rawData = fs.readFileSync('./expense.json', 'utf8')
 
-          lineItem.LineItemExpenseFields?.forEach((field: ExpenseField) => {
-            const type = field.Type?.Text || ''
-            const value = field.ValueDetection?.Text || ''
+    const data: GetExpenseAnalysisCommandOutput = input
 
-            switch (type.toUpperCase()) {
-              case 'DATE':
-                postDate = value
+    if (!data || !data.ExpenseDocuments) {
+      throw new Error('No data found in analysis result')
+    }
+    const formattedData: AccountActivityUpdate[] = []
+
+    data.ExpenseDocuments.forEach((doc) => {
+      doc.LineItemGroups?.forEach((items) => {
+        items.LineItems?.forEach((fields) => {
+          const entry = {
+            postDate: '',
+            description: '',
+            debit: '',
+            credit: '',
+            balance: '',
+            category: '',
+          }
+
+          fields.LineItemExpenseFields?.forEach((expenseFields) => {
+            const label = expenseFields.LabelDetection?.Text || ''
+            const value = expenseFields.ValueDetection?.Text || ''
+
+            switch (label.toLowerCase()) {
+              case 'post date':
+              case 'date':
+                entry.postDate = value
                 break
-              case 'DESCRIPTION':
-              case 'ITEM':
-                description = value
+              case 'description':
+                entry.description = value
                 break
-              case 'DEBIT':
-              case 'DEBITS':
-              case 'WITHDRAWAL':
-                debits = value
+              case 'debits':
+              case 'debit':
+                entry.debit = value
                 break
-              case 'CREDIT':
-              case 'CREDITS':
-              case 'DEPOSIT':
-                credits = value
+              case 'credits':
+              case 'credit':
+                entry.credit = value
                 break
-              case 'BALANCE':
-              case 'PRICE':
-                balance = value
+              case 'balance':
+              case 'amount':
+                entry.balance = value
                 break
               default:
                 break
             }
-
-            expenseRow += `${value} `
           })
 
-          if (!postDate) {
-            const dateMatch = expenseRow.match(/\d{2}\/\d{2}\/\d{4}/)
-            if (dateMatch) {
-              postDate = dateMatch[0]
-            }
+          if (
+            entry.postDate ||
+            entry.description ||
+            entry.debit ||
+            entry.credit ||
+            entry.balance
+          ) {
+            formattedData.push(entry)
           }
-
-          activities.push({
-            postDate: postDate.trim(),
-            description: description.trim(),
-            debits: debits.trim(),
-            credits: credits.trim(),
-            balance: balance.trim(),
-          })
         })
       })
     })
 
-    return {
-      bankName,
-      customerName,
-      customerNumber,
-      phoneNumber,
-      accountType,
-      accountNumber,
-      beginningBalance,
-      endingBalance,
-      statementDate,
-      activities,
-    }
+    return formattedData
   }
 }

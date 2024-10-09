@@ -8,46 +8,50 @@ datasource db {
 }
 
 model Client {
-  id        String   @id @default(uuid())
-  name      String
-  email     String   @unique
-  doc       String
-  statements Statement[] // Relacionamento com Statement
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String      @id @default(uuid())
+  name       String
+  email      String      @unique
+  doc        String
+  statements Statement[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
 }
 
 model Statement {
-  id              String            @id @default(uuid())
-  clientId        String
-  bankName        String
-  statementDate   DateTime?
-  statementFile   Bytes
-  statementKey    String
-  accountActivity AccountActivity[] // Relacionamento com AccountActivity
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
+  id               String            @id @default(uuid())
+  clientId         String
+  bankName         String
+  customerName     String
+  customerNumber   String
+  accountType      String
+  accountNumber    String
+  beginningBalance String
+  endingBalance    String
+  statementDate    String
+  statementFile    Bytes
+  statementKey     String
+  accountActivity  AccountActivity[]
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
 
   client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
 }
 
 model AccountActivity {
-  id               String     @id @default(uuid())
-  statementId      String
-  postDate         DateTime
-  description      String
-  debit            Float
-  credit           Float
-  balance          Float
-  beginningBalance Float
-  endingBalance    Float
-  categories       Category[] @relation("CategoryToAccountActivity") // Relacionamento muitos-para-muitos
+  id          String  @id @default(uuid())
+  statementId String
+  postDate    String
+  description String
+  debit       String
+  credit      String
+  balance     String
+  category    String?
 
   statement Statement @relation(fields: [statementId], references: [id], onDelete: Cascade)
 }
 
-model Category {
-  id         String            @id @default(uuid())
-  name       String
-  activities AccountActivity[] @relation("CategoryToAccountActivity")
-}
+// model Category {
+//   id         String            @id @default(uuid())
+//   name       String
+//   activities AccountActivity[] @relation("CategoryToAccountActivity")
+// }

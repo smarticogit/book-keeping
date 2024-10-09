@@ -1,6 +1,6 @@
+import { StatementResponse } from '@/domain/entities/types/statement.types'
 import { StatementRepository } from '@/domain/repositories/statement-repository'
 import { OCRService } from '@/domain/services/ocr-service'
-import { ExtractedData } from '@/infra/services/types'
 
 export class ProcessStatementUseCase {
   constructor(
@@ -8,30 +8,42 @@ export class ProcessStatementUseCase {
     private ocrService: OCRService,
   ) {}
 
-  async run(statementId: string): Promise<ExtractedData | null> {
+  async run(statementId: string): Promise<StatementResponse | null> {
     const statement = await this.statementRepository.findById(statementId)
 
     if (!statement) {
       throw new Error('Statement not found')
     }
 
-    const response = await this.ocrService.analyze(statement.statementKey)
+    // const resultAnalyzeExpense = await this.ocrService.analyzeExpense(
+    //   statement.statementKey,
+    // )
 
-    if (!response.JobId) {
-      throw new Error('Análise falhou')
-    }
+    // if (!resultAnalyzeExpense) {
+    //   throw new Error('Analyze expense failed')
+    // }
 
-    const analysisResponse = await this.ocrService.getResults(response.JobId)
+    // await this.ocrService.analyzeDocument(statement.statementKey)
 
-    if (!analysisResponse) {
-      throw new Error('Análise falhou ou não retornou resultados.')
-    }
+    // const result = this.ocrService.dataFormat()
+    // const activities = this.ocrService.dataFormatExpense()
 
-    const data = this.ocrService.dataFormat(analysisResponse)
+    // const newData = {
+    //   ...statement,
+    //   bankName: result.bankName,
+    //   statementDate: result.statementDate,
+    //   customerName: result.customerName,
+    //   customerNumber: result.customerNumber,
+    //   accountType: result.accountType,
+    //   accountNumber: result.accountNumber,
+    //   beginningBalance: result.beginningBalance,
+    //   endingBalance: result.endingBalance,
+    //   accountActivity: activities,
+    //   statementKey: statement.statementKey,
+    // }
 
-    if (!data) {
-      return null
-    }
-    return data
+    // const statementUpdated = await this.statementRepository.update(newData)
+
+    return null
   }
 }

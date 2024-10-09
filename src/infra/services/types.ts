@@ -1,3 +1,5 @@
+import { AccountActivity } from '@prisma/client'
+
 export interface TextractBlock {
   BlockType: string
   Confidence?: number
@@ -47,21 +49,14 @@ export type Output = {
   }[]
 }[]
 
-export interface ExtractedData {
+export interface AccountResponse {
   bankName: string
   customerName: string
   customerNumber: string
-  phoneNumber: string
   accountType: string
   accountNumber: string
   beginningBalance: string
   endingBalance: string
   statementDate: string
-  activities: {
-    postDate?: string
-    description?: string
-    debits?: string
-    credits?: string
-    balance?: string
-  }[]
+  activities: AccountActivity[]
 }

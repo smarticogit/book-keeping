@@ -8,5 +8,5 @@ export async function findOCRDataController(
   const findOcrDataUseCase = makeFindOCRDataUseCAse()
   const ocrData = await findOcrDataUseCase.run()
 
-  return reply.status(201).send(ocrData)
+  return reply.status(200).send(ocrData)
 }

@@ -10,5 +10,5 @@ export async function findClientByIdController(
   const findClientUseCase = makeFindClientUseCase()
   const client = await findClientUseCase.run(statementId)
 
-  return reply.status(201).send(client)
+  return reply.status(200).send(client)
 }
